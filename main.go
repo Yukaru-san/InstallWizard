@@ -8,7 +8,6 @@ import (
 	"os/exec"
 	"path/filepath"
 	"runtime"
-	"strings"
 
 	"github.com/gobuffalo/packr"
 )
@@ -23,13 +22,13 @@ import (
 
 func main() {
 
-	if len(os.Args[1]) == 0 {
+	if os.Args[1] == "" {
 		fmt.Println("first arg should be your desired directory")
 		return
 	}
 
 	fmt.Println("Creating temporary directory")
-	err := os.Mkdir(TempDir, 744)
+	err := os.Mkdir(TempDir, 0744)
 	printError(err)
 
 	fmt.Println("Exploring directory")
@@ -45,7 +44,7 @@ func main() {
 	printError(err)
 
 	fmt.Println("Creating baseDir directions")
-	ioutil.WriteFile(fmt.Sprint(TempDir, string(filepath.Separator), "baseDir"), []byte(os.Args[1]), 744)
+	ioutil.WriteFile(fmt.Sprint(TempDir, string(filepath.Separator), "baseDir"), []byte(os.Args[1]), 0744)
 
 	fmt.Println("Creating packr")
 	// Create Packr binary
@@ -70,14 +69,14 @@ func main() {
 	}
 	printError(err)
 
-	err = ioutil.WriteFile(fmt.Sprint(TempDir, string(filepath.Separator), binaryName), packrData, 744)
+	err = ioutil.WriteFile(fmt.Sprint(TempDir, string(filepath.Separator), binaryName), packrData, 0744)
 	printError(err)
 
 	fmt.Println("Creating new installer...")
 	// Set up Paths
-	splitPath := strings.Split(os.Args[0], string(filepath.Separator))
-	filePath := strings.Join(splitPath[0:len(splitPath)-1], string(filepath.Separator))
-	tempDir := fmt.Sprint(filePath, string(filepath.Separator), TempDir)
+	// splitPath := strings.Split(os.Args[0], string(filepath.Separator))
+	// filePath := strings.Join(splitPath[0:len(splitPath)-1], string(filepath.Separator))
+	//	tempDir := fmt.Sprint(filePath, string(filepath.Separator), TempDir)
 
 	// Create installer binary
 	var cmd *exec.Cmd
@@ -91,7 +90,7 @@ func main() {
 		cmd = exec.Command(binaryName, "build", "-o", installerName)
 	}
 
-	cmd.Dir = tempDir
+	cmd.Dir = TempDir
 	cmd.Stdout = os.Stdout
 	cmd.Stderr = os.Stderr
 	err = cmd.Run()
@@ -105,20 +104,20 @@ func main() {
 	// Create output
 	os.Mkdir("output", 700)
 
-	binary, err := ioutil.ReadFile(fmt.Sprint(tempDir, string(filepath.Separator), installerName))
+	binary, err := ioutil.ReadFile(fmt.Sprint(TempDir, string(filepath.Separator), installerName))
 
 	if err != nil {
 		printError(err)
 	}
 
-	err = ioutil.WriteFile(fmt.Sprint("output", string(filepath.Separator), installerName), binary, 744)
+	err = ioutil.WriteFile(fmt.Sprint("output", string(filepath.Separator), installerName), binary, 0744)
 
 	if err != nil {
 		printError(err)
 	}
 
 	// Clean up
-	err = os.RemoveAll(tempDir)
+	err = os.RemoveAll(TempDir)
 
 	if err != nil {
 		printError(err)

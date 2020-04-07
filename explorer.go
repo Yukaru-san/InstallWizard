@@ -38,7 +38,7 @@ var (
 	Dirs []Directory
 
 	// TempDir temporarely holds all data needed
-	TempDir = "Temp %$% (do not delete!)"
+	TempDir = "WorkingDirectoryDoNotDelete"
 )
 
 // SaveInstallerFiles puts the main files from the explorer into the temp directory TODO Add add files needed
