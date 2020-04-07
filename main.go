@@ -87,7 +87,7 @@ func main() {
 		cmd = exec.Command(binaryName, "build", "-o", installerName)
 	} else {
 		installerName = "installer"
-		cmd = exec.Command(binaryName, "build", "-o", installerName)
+		cmd = exec.Command("./"+binaryName, "build", "-o", installerName)
 	}
 
 	cmd.Dir = TempDir
@@ -102,7 +102,7 @@ func main() {
 
 	fmt.Println("Finalising...")
 	// Create output
-	os.Mkdir("output", 700)
+	os.Mkdir("output", 0744)
 
 	binary, err := ioutil.ReadFile(fmt.Sprint(TempDir, string(filepath.Separator), installerName))
 

@@ -54,8 +54,8 @@ func SaveInstallerFiles() error {
 	recoverFile, err := box.Open("recover.go")
 	recoverData, err := ioutil.ReadAll(recoverFile)
 
-	err = ioutil.WriteFile(fmt.Sprint(TempDir, string(filepath.Separator), "main.go"), mainData, 744)
-	err = ioutil.WriteFile(fmt.Sprint(TempDir, string(filepath.Separator), "recover.go"), recoverData, 744)
+	err = ioutil.WriteFile(fmt.Sprint(TempDir, string(filepath.Separator), "main.go"), mainData, 0744)
+	err = ioutil.WriteFile(fmt.Sprint(TempDir, string(filepath.Separator), "recover.go"), recoverData, 0744)
 
 	return err
 }
@@ -72,7 +72,7 @@ func SaveDataAsJSON() error {
 	}
 
 	// Save to temp directory
-	err = ioutil.WriteFile(fmt.Sprint(TempDir, string(filepath.Separator), "explorerData.json"), json, 744)
+	err = ioutil.WriteFile(fmt.Sprint(TempDir, string(filepath.Separator), "explorerData.json"), json, 0744)
 
 	if err != nil {
 		return err
@@ -122,7 +122,7 @@ func Explore(path string) error {
 func IsIgnored(path string, info os.FileInfo) bool {
 	// TODO
 
-	if strings.Contains(path, TempDir) {
+	if strings.Contains(path, TempDir) || strings.Contains(path, "PackageInstaller") {
 		return true
 	}
 
