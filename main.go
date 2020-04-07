@@ -7,6 +7,13 @@ import (
 	"github.com/Yukaru-san/InstallWizard/explorer"
 )
 
+/*
+
+	TODO Use and implement packr
+	Use packr to get the installer within the executable
+
+*/
+
 func main() {
 	err := os.Mkdir(explorer.TempDir, 744)
 	printError(err)
@@ -17,6 +24,8 @@ func main() {
 	err = explorer.SaveDataAsJSON()
 	printError(err)
 
+	err = explorer.SaveInstallerFiles()
+	printError(err)
 }
 
 func printError(err error) {

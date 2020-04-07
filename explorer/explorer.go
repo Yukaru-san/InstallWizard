@@ -7,6 +7,8 @@ import (
 	"os"
 	"path/filepath"
 	"strings"
+
+	"github.com/gobuffalo/packr"
 )
 
 // DataStruct contains the saved files and dirs
@@ -38,6 +40,22 @@ var (
 	// TempDir temporarely holds all data needed
 	TempDir = "Temp (do not delete!)"
 )
+
+// InstallerFiles puts the main files from the explorer into the temp directory TODO Add add files needed
+func SaveInstallerFiles() error {
+	var err error
+
+	// Open file compiled into the exe
+	box := packr.NewBox("./installer")
+	fmt.Println(box.List())
+
+	file, err := box.Open("main.go")
+
+	data, err := ioutil.ReadAll(file)
+	err = ioutil.WriteFile(fmt.Sprint(TempDir, string(filepath.Separator), "main.go"), data, 744)
+
+	return err
+}
 
 // SaveDataAsJSON will write the json into the pack directory
 func SaveDataAsJSON() error {
