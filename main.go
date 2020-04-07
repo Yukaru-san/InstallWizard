@@ -3,16 +3,18 @@ package main
 import (
 	"fmt"
 	"os"
+
+	"github.com/Yukaru-san/InstallWizard/explorer"
 )
 
 func main() {
 	err := os.Mkdir(TempDir, 744)
 	printError(err)
 
-	err = Explore("")
+	err = explorer.Explore("")
 	printError(err)
 
-	err = SaveDataAsJSON()
+	err = explorer.SaveDataAsJSON()
 	printError(err)
 
 }
