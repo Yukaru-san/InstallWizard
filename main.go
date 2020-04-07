@@ -8,7 +8,7 @@ import (
 )
 
 func main() {
-	err := os.Mkdir(TempDir, 744)
+	err := os.Mkdir(explorer.TempDir, 744)
 	printError(err)
 
 	err = explorer.Explore("")
