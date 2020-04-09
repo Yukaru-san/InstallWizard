@@ -9,9 +9,7 @@ import (
 
 /*
 	TODO
-		Check for args
-		Cross-Platform directory args
-		Ignore desired files / folders
+		installer functionality
 
 */
 
@@ -42,7 +40,7 @@ func main() {
 	printError(err)
 
 	fmt.Println("Building new executable")
-	err = BuildNewBinary("windows")
+	err = BuildNewBinary()
 	printError(err)
 
 	err = CleanUp()

@@ -223,7 +223,7 @@ func ImplementPackrLibrary() error {
 }
 
 // BuildNewBinary builds the installer binary (supports: windows, linux, darwin)
-func BuildNewBinary(targetSystem string) error {
+func BuildNewBinary() error {
 	var cmd *exec.Cmd
 	var installerName string
 
