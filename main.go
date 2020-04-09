@@ -2,14 +2,9 @@ package main
 
 import (
 	"fmt"
-	"io/ioutil"
-	"net/http"
 	"os"
-	"os/exec"
 	"path/filepath"
-	"runtime"
-
-	"github.com/gobuffalo/packr"
+	"strings"
 )
 
 /*
@@ -22,106 +17,36 @@ import (
 
 func main() {
 
-	if os.Args[1] == "" {
-		fmt.Println("first arg should be your desired directory")
-		return
-	}
+	// TODO Build output for other systems aswell
+
+	// Find name of current executable
+	execPath := strings.Split(os.Args[0], string(filepath.Separator))
+	ExecutableName = execPath[len(execPath)-1]
+
+	fmt.Println(os.Args[0])
 
 	fmt.Println("Creating temporary directory")
 	err := os.Mkdir(TempDir, 0744)
 	printError(err)
 
-	fmt.Println("Exploring directory")
-	err = Explore("")
+	fmt.Print("Implementing files into the binary\n\n")
+	err = ImplementFiles(".")
 	printError(err)
 
-	fmt.Println("Saving data structure")
-	err = SaveDataAsJSON()
+	fmt.Println("\nImplementing the packr library")
+	err = ImplementPackrLibrary()
 	printError(err)
 
-	fmt.Println("Saving intaller files")
-	err = SaveInstallerFiles()
+	fmt.Println("Implementing installer files")
+	err = ImplementInstallerFiles()
 	printError(err)
 
-	fmt.Println("Creating baseDir directions")
-	ioutil.WriteFile(fmt.Sprint(TempDir, string(filepath.Separator), "baseDir"), []byte(os.Args[1]), 0744)
-
-	fmt.Println("Creating packr")
-	// Create Packr binary
-	box := packr.NewBox("packr")
-	var packrFile http.File
-	var packrData []byte
-	var binaryName string
-
-	switch runtime.GOOS {
-	case "windows":
-		binaryName = "packr.exe"
-		packrFile, err = box.Open(binaryName)
-		packrData, err = ioutil.ReadAll(packrFile)
-	case "darwin":
-		binaryName = "packr_Mac"
-		packrFile, err = box.Open(binaryName)
-		packrData, err = ioutil.ReadAll(packrFile)
-	case "linux":
-		binaryName = "packr_Linux"
-		packrFile, err = box.Open(binaryName)
-		packrData, err = ioutil.ReadAll(packrFile)
-	}
+	fmt.Println("Building new executable")
+	err = BuildNewBinary()
 	printError(err)
 
-	err = ioutil.WriteFile(fmt.Sprint(TempDir, string(filepath.Separator), binaryName), packrData, 0744)
+	err = CleanUp()
 	printError(err)
-
-	fmt.Println("Creating new installer...")
-	// Set up Paths
-	// splitPath := strings.Split(os.Args[0], string(filepath.Separator))
-	// filePath := strings.Join(splitPath[0:len(splitPath)-1], string(filepath.Separator))
-	//	tempDir := fmt.Sprint(filePath, string(filepath.Separator), TempDir)
-
-	// Create installer binary
-	var cmd *exec.Cmd
-	var installerName string
-
-	if runtime.GOOS == "windows" {
-		installerName = "installer.exe"
-		cmd = exec.Command(binaryName, "build", "-o", installerName)
-	} else {
-		installerName = "installer"
-		cmd = exec.Command("./"+binaryName, "build", "-o", installerName)
-	}
-
-	cmd.Dir = TempDir
-	cmd.Stdout = os.Stdout
-	cmd.Stderr = os.Stderr
-	err = cmd.Run()
-	cmd.Wait()
-
-	if err != nil {
-		printError(err)
-	}
-
-	fmt.Println("Finalising...")
-	// Create output
-	os.Mkdir("output", 0744)
-
-	binary, err := ioutil.ReadFile(fmt.Sprint(TempDir, string(filepath.Separator), installerName))
-
-	if err != nil {
-		printError(err)
-	}
-
-	err = ioutil.WriteFile(fmt.Sprint("output", string(filepath.Separator), installerName), binary, 0744)
-
-	if err != nil {
-		printError(err)
-	}
-
-	// Clean up
-	err = os.RemoveAll(TempDir)
-
-	if err != nil {
-		printError(err)
-	}
 }
 
 func printError(err error) {
@@ -129,18 +54,3 @@ func printError(err error) {
 		fmt.Println(err)
 	}
 }
-
-/*
-Windows: GOOS=windows GOARCH=amd64
-MAC:  GOOS=darwin GOARCH=amd64 go build
-
-
-fmt.Println("Saved in:", fmt.Sprint(gaw.GetHome(), string(filepath.Separator), ".dmanager", string(filepath.Separator), "TestDirectory"))
-
-	err := Explore("")
-	if err != nil {
-		fmt.Println(err.Error())
-	} else {
-		CreateFiles(fmt.Sprint(gaw.GetHome(), string(filepath.Separator), ".dmanager", string(filepath.Separator), "TestDirectory"))
-	}
-*/

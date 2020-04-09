@@ -1,6 +1,7 @@
 package main
 
 import (
+	"bufio"
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
@@ -52,6 +53,10 @@ func CreateFiles() {
 	box := packr.NewBox(".")
 	dirFile, err := box.Open("baseDir")
 	dirData, err := ioutil.ReadAll(dirFile)
+
+	fmt.Println("Box content: \"", box.List())
+	reader := bufio.NewReader(os.Stdin)
+	reader.ReadString('\n')
 
 	if err != nil {
 		fmt.Println(err.Error())
