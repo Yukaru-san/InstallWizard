@@ -1,0 +1,43 @@
+package main
+
+import (
+	"fmt"
+	"os"
+
+	"github.com/gobuffalo/packr"
+)
+
+// DataStruct contains the saved files and dirs
+type DataStruct struct {
+	SavedFiles map[string][]File
+	SavedDirs  []Directory
+}
+
+// Directory represents a directory
+type Directory struct {
+	Path       string
+	Permission os.FileMode
+}
+
+// File represents a local file
+type File struct {
+	Name       string
+	Path       string
+	Bytes      []byte
+	Permission os.FileMode
+}
+
+var data DataStruct
+
+// RecoverFileStructure recovers files into DataStruct
+func RecoverFileStructure() {
+	// json file
+	box := packr.NewBox(".")
+
+	fmt.Println(box.List())
+}
+
+// CreateFiles creates the file structure saved in files in another location
+func CreateFiles() {
+
+}

@@ -135,29 +135,19 @@ func ImplementFiles(sourcePath string) error {
 func ImplementInstallerFiles() error {
 	var err error
 
-	// Open file compiled into the exe TODO
+	// Open file compiled into the exe (.inst, cause packr causes issues otherwise)
 	box := packr.NewBox("installer")
 
-	mainFile, err := box.Open("main.go")
+	mainFile, err := box.Open("main.inst")
 	mainData, err := ioutil.ReadAll(mainFile)
 
-	recoverFile, err := box.Open("recover.go")
+	recoverFile, err := box.Open("recover.inst")
 	recoverData, err := ioutil.ReadAll(recoverFile)
 
 	err = ioutil.WriteFile(fmt.Sprint(TempDir, string(filepath.Separator), "main.go"), mainData, 0744)
 	err = ioutil.WriteFile(fmt.Sprint(TempDir, string(filepath.Separator), "recover.go"), recoverData, 0744)
 
 	return err
-}
-
-// IsIgnored returns true if the file or folder should be ignored when packing
-func IsIgnored(path string, info os.FileInfo) bool {
-	// TODO
-	if strings.Contains(path, TempDir) || strings.Contains(path, "ExecutableName") || strings.Contains(path, ".git") {
-		return true
-	}
-
-	return false
 }
 
 // ImplementPackrLibrary implements the data from packr
@@ -232,47 +222,68 @@ func ImplementPackrLibrary() error {
 	return err
 }
 
-// BuildNewBinary builds the installer binary
-func BuildNewBinary() error {
+// BuildNewBinary builds the installer binary (supports: windows, linux, darwin)
+func BuildNewBinary(targetSystem string) error {
 	var cmd *exec.Cmd
 	var installerName string
 
-	if runtime.GOOS == "windows" {
-		installerName = "installer.exe"
-		cmd = exec.Command("packr", "build", "-o", installerName)
-	} else {
-		installerName = "installer"
-		cmd = exec.Command("packr", "build", "-o", installerName)
+	for i := 0; i < 3; i++ {
+		if i == 0 {
+			os.Setenv("GOOS", "linux")
+		} else if i == 1 {
+			os.Setenv("GOOS", "windows")
+		} else {
+			os.Setenv("GOOS", "darwin")
+		}
+
+		if os.Getenv("GOOS") == "windows" {
+			installerName = "WindowsInstaller.exe"
+			cmd = exec.Command("packr", "build", "-o", installerName)
+		} else if os.Getenv("GOOS") == "linux" {
+			installerName = "LinuxInstaller"
+			cmd = exec.Command("packr", "build", "-o", installerName)
+		} else {
+			installerName = "DarwinInstaller"
+			cmd = exec.Command("packr", "build", "-o", installerName)
+		}
+
+		cmd.Dir = TempDir
+		cmd.Stdout = os.Stdout
+		cmd.Stderr = os.Stderr
+		err := cmd.Run()
+		cmd.Wait()
+
+		if err != nil {
+			return err
+		}
+
+		// Create output dir
+		if i == 0 {
+			os.Mkdir("output", 0744)
+		}
+
+		// Read binary
+		tempBinaryPath := fmt.Sprint(TempDir, string(filepath.Separator), installerName)
+		binary, err := ioutil.ReadFile(tempBinaryPath)
+
+		if err != nil {
+			return err
+		}
+
+		// Save binary
+		binaryPath := fmt.Sprint("output", string(filepath.Separator), installerName)
+		err = ioutil.WriteFile(binaryPath, binary, 0744)
+
+		// Delete the temporary binary
+		os.Remove(tempBinaryPath)
+
+		if err != nil {
+			return err
+		}
+
 	}
 
-	cmd.Dir = TempDir
-	cmd.Stdout = os.Stdout
-	cmd.Stderr = os.Stderr
-	err := cmd.Run()
-	cmd.Wait()
-
-	if err != nil {
-		return err
-	}
-
-	// Create output dir
-	os.Mkdir("output", 0744)
-
-	binary, err := ioutil.ReadFile(fmt.Sprint(TempDir, string(filepath.Separator), installerName))
-
-	if err != nil {
-		return err
-	}
-
-	// Save binary
-	binaryPath := fmt.Sprint("output", string(filepath.Separator), installerName)
-	err = ioutil.WriteFile(binaryPath, binary, 0744)
-
-	if err != nil {
-		return err
-	}
-
-	fmt.Print("\nDone! Check your installer file:\n", binaryPath, "\n\n")
+	fmt.Print("\nDone! Check your output directory.\n\n")
 
 	return nil
 }
@@ -296,6 +307,16 @@ func CleanUp() error {
 	}
 
 	return err
+}
+
+// IsIgnored returns true if the file or folder should be ignored when packing
+func IsIgnored(path string, info os.FileInfo) bool {
+	// TODO
+	if strings.Contains(path, TempDir) || strings.Contains(path, "ExecutableName") || strings.Contains(path, ".git") || strings.Contains(path, "output") || strings.Contains(path, "packr") {
+		return true
+	}
+
+	return false
 }
 
 func unpackZip(archive, target string) error {

@@ -42,7 +42,7 @@ func main() {
 	printError(err)
 
 	fmt.Println("Building new executable")
-	err = BuildNewBinary()
+	err = BuildNewBinary("windows")
 	printError(err)
 
 	err = CleanUp()
