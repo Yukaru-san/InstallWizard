@@ -17,6 +17,12 @@ When you are done, you can build the InstallWizard using:
 ```packr build```<br>
 And that's pretty much it. You will receive the binary which you can then use to create new installers.
 
+# Download binaries
+If you want to spare yourself the trouble of creating your own binary, you can head over to
+the [release tab](https://github.com/Yukaru-san/InstallWizard/releases/tag/1.0) and download
+a precompiled version for your OS.
+
+
 # Example
 Using the InstallWizard is pretty straight forward. But here is a complete example on how it can be used:
 <br>(Note that it will be a bit different on linux since it's done from command-line only!)
