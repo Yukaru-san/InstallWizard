@@ -38,7 +38,7 @@ Now you can ship the installers to your clients. Upon installation their POV wil
 1. Running the installer:<br>
 ![example6](https://very.highly.illegal-dark-web-server.xyz/preview/raw/5W9FwYXPn15HqOdqpTxKPLitF)
 
-2. Selecting the directory for the program to be installed in:
+2. Selecting the directory for the program to be installed in:<br>
 ![example7](https://very.highly.illegal-dark-web-server.xyz/preview/raw/l3YjZEhWczdgQiTdEh6Z8r7zm)
 
 3. The data will be extracted and you can find everything inside the desired directory:
