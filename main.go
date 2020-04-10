@@ -3,19 +3,16 @@ package main
 import (
 	"fmt"
 	"os"
+	"os/signal"
 	"path/filepath"
 	"strings"
+	"syscall"
 )
-
-/*
-	TODO
-		installer functionality
-
-*/
 
 func main() {
 
-	// TODO Build output for other systems aswell
+	// Interrupt handler
+	SetupCloseHandler()
 
 	// Find name of current executable
 	execPath := strings.Split(os.Args[0], string(filepath.Separator))
@@ -31,15 +28,21 @@ func main() {
 	err = ImplementFiles(".")
 	printError(err)
 
-	fmt.Println("\nImplementing the packr library")
+	fmt.Println("\nTelling your installer it's name")
+	err = ImplementInstallerName()
+	printError(err)
+
+	fmt.Println("Implementing required libraries")
 	err = ImplementPackrLibrary()
+	printError(err)
+	err = ImplementSqweekLibrary()
 	printError(err)
 
 	fmt.Println("Implementing installer files")
 	err = ImplementInstallerFiles()
 	printError(err)
 
-	fmt.Println("Building new executable")
+	fmt.Println("Building new executables")
 	err = BuildNewBinary()
 	printError(err)
 
@@ -51,4 +54,16 @@ func printError(err error) {
 	if err != nil {
 		fmt.Println(err)
 	}
+}
+
+// SetupCloseHandler catches an interrupt signal from the host pc and cleans the files before exiting
+func SetupCloseHandler() {
+	c := make(chan os.Signal)
+	signal.Notify(c, os.Interrupt, syscall.SIGTERM)
+	go func() {
+		<-c
+		fmt.Println("\r- Program interrupted. Cleaning up and exiting.")
+		CleanUp()
+		os.Exit(0)
+	}()
 }

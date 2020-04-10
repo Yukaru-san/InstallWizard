@@ -1,0 +1,163 @@
+package main
+
+import (
+	"archive/zip"
+	"bufio"
+	"fmt"
+	"io"
+	"io/ioutil"
+	"os"
+	"os/signal"
+	"path/filepath"
+	"strings"
+	"syscall"
+
+	"github.com/gobuffalo/packr"
+)
+
+// DataStruct contains the saved files and dirs
+type DataStruct struct {
+	SavedFiles map[string][]File
+	SavedDirs  []Directory
+}
+
+// Directory represents a directory
+type Directory struct {
+	Path       string
+	Permission os.FileMode
+}
+
+// File represents a local file
+type File struct {
+	Name       string
+	Path       string
+	Bytes      []byte
+	Permission os.FileMode
+}
+
+var (
+	data    DataStruct
+	zipName = "packedFiles.zip"
+
+	desiredDirectory = ""
+)
+
+func main() {
+	// Program
+	RecoverFileStructure()
+}
+
+// RecoverFileStructure recovers files into DataStruct
+func RecoverFileStructure() {
+
+	box := packr.NewBox("files")
+
+	// Program name
+	nameFile, _ := box.Open("name.txt")
+	nameData, _ := ioutil.ReadAll(nameFile)
+
+	// Installation path
+	desiredDirectory = SelectPath(string(nameData))
+
+	// Unpack and create files
+	fmt.Println("Unpacking files...")
+	CreateFiles(box, desiredDirectory)
+	fmt.Println("Finished. You are ready to go!")
+}
+
+// CreateFiles creates the file structure saved in files in another location
+func CreateFiles(box packr.Box, installDir string) {
+
+	// zip file
+	zipFile, _ := box.Open(zipName)
+	zipData, _ := ioutil.ReadAll(zipFile)
+
+	// temporarely save zip file
+	zipPath := fmt.Sprint(installDir, string(filepath.Separator), zipName)
+	err := ioutil.WriteFile(zipPath, zipData, 0744)
+
+	if err != nil {
+		panic(err)
+	}
+
+	// Unpack zip file
+	err = UnpackZip(zipPath, installDir)
+	if err != nil {
+		panic(err)
+	}
+
+	// Delete zip file
+	os.Remove(zipPath)
+}
+
+// SelectPath returns the path the user wishes to install the programm into
+func SelectPath(programName string) string {
+
+	reader := bufio.NewReader(os.Stdin)
+	fmt.Println("This will install " + programName + ".")
+
+	dir := ""
+
+	if len(os.Args) == 1 {
+		fmt.Print("\nYou didn't specify an installation path when starting the installer.\nPlease do so now:")
+
+		input, _ := reader.ReadString('\n')
+		input = strings.ReplaceAll(input, "\n", "")
+
+		dir = input
+	} else {
+		dir = os.Args[1]
+		fmt.Println("You chose " + dir + " as your installation path.")
+	}
+
+	fmt.Print("\n\n")
+	return dir
+}
+
+// UnpackZip unpacks the archive in the given path
+func UnpackZip(archive, target string) error {
+
+	var fileReader io.ReadCloser
+	var targetFile *os.File
+
+	// Create reader
+	reader, err := zip.OpenReader(archive)
+	if err != nil {
+		return err
+	}
+
+	// Create directories
+	if err := os.MkdirAll(target, 0755); err != nil {
+		return err
+	}
+
+	// Loop and create files
+	for _, file := range reader.File {
+		path := filepath.Join(target, file.Name)
+		if file.FileInfo().IsDir() {
+			os.MkdirAll(path, file.Mode())
+			continue
+		}
+
+		fileReader, err = file.Open()
+		if err != nil {
+			return err
+		}
+
+		targetFile, err = os.OpenFile(path, os.O_WRONLY|os.O_CREATE|os.O_TRUNC, file.Mode())
+		if err != nil {
+			return err
+		}
+
+		if _, err := io.Copy(targetFile, fileReader); err != nil {
+			return err
+		}
+	}
+
+	// Close
+	reader.Close()
+	fileReader.Close()
+	targetFile.Close()
+
+	return nil
+}

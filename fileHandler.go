@@ -2,6 +2,7 @@ package main
 
 import (
 	"archive/zip"
+	"bufio"
 	"fmt"
 	"io"
 	"io/ioutil"
@@ -42,7 +43,9 @@ var (
 
 	// TempDir temporarely holds all data needed
 	TempDir = "WorkingDirectoryDoNotDelete"
-	zipName = "packedFiles.zip"
+	// FilesPath holds installer data
+	FilesPath = ""
+	zipName   = "packedFiles.zip"
 
 	// directions needed for save and cleanup
 	zipDir                = ""
@@ -57,7 +60,11 @@ var (
 
 // ImplementFiles searches the given dir and implements found files
 func ImplementFiles(sourcePath string) error {
-	zipfile, err := os.Create(fmt.Sprint(TempDir, string(filepath.Separator), zipName))
+	// Create zip folder path
+	FilesPath = fmt.Sprint(TempDir, string(filepath.Separator), "files")
+	os.Mkdir(FilesPath, 0744)
+
+	zipfile, err := os.Create(fmt.Sprint(FilesPath, string(filepath.Separator), zipName))
 	if err != nil {
 		return err
 	}
@@ -131,6 +138,31 @@ func ImplementFiles(sourcePath string) error {
 	return err
 }
 
+// ImplementInstallerName tells the installer it's name
+func ImplementInstallerName() error {
+
+	name := ""
+
+	if len(os.Args) == 1 {
+
+		fmt.Print("\nYou didn't specify a name when starting the program.\nPlease do so now:\n")
+
+		reader := bufio.NewReader(os.Stdin)
+		input, _ := reader.ReadString('\n')
+		// convert CRLF to LF
+		input = strings.ReplaceAll(input, "\r\n", "")
+		input = strings.ReplaceAll(input, "\n", "")
+
+		name = input
+	} else {
+		name = os.Args[1]
+	}
+
+	fmt.Print("\n\n")
+	err := ioutil.WriteFile(fmt.Sprint(FilesPath, string(filepath.Separator), "name.txt"), []byte(name), 0744)
+	return err
+}
+
 // ImplementInstallerFiles puts the main files from the explorer into the temp directory TODO Add add files needed
 func ImplementInstallerFiles() error {
 	var err error
@@ -141,11 +173,11 @@ func ImplementInstallerFiles() error {
 	mainFile, err := box.Open("main.inst")
 	mainData, err := ioutil.ReadAll(mainFile)
 
-	recoverFile, err := box.Open("recover.inst")
-	recoverData, err := ioutil.ReadAll(recoverFile)
+	mainFileLinux, err := box.Open("main_linux.inst")
+	mainDataLinux, err := ioutil.ReadAll(mainFileLinux)
 
 	err = ioutil.WriteFile(fmt.Sprint(TempDir, string(filepath.Separator), "main.go"), mainData, 0744)
-	err = ioutil.WriteFile(fmt.Sprint(TempDir, string(filepath.Separator), "recover.go"), recoverData, 0744)
+	err = ioutil.WriteFile(fmt.Sprint(TempDir, string(filepath.Separator), "main.linux"), mainDataLinux, 0744)
 
 	return err
 }
@@ -154,34 +186,14 @@ func ImplementInstallerFiles() error {
 func ImplementPackrLibrary() error {
 
 	// Checking if packr's library is installed on the system
-	githubPath := fmt.Sprint(os.Getenv("GOPATH"), string(filepath.Separator), "src", string(filepath.Separator), "github.com", string(filepath.Separator))
-	buffaloDir := fmt.Sprint(os.Getenv("GOPATH"), string(filepath.Separator), "src", string(filepath.Separator), "github.com", string(filepath.Separator), "gobuffalo", string(filepath.Separator))
 	packrDir := fmt.Sprint(os.Getenv("GOPATH"), string(filepath.Separator), "src", string(filepath.Separator), "github.com", string(filepath.Separator), "gobuffalo", string(filepath.Separator), "packr", string(filepath.Separator))
 
 	var err error
 
-	fmt.Println(" > checking for packr library inside GOPATH")
-	if _, err := os.Stat(packrDir); !os.IsNotExist(err) {
-		fmt.Println("   -> library found. Not installing.")
-	} else {
-		fmt.Println("   -> library not found")
-		fmt.Println("      -> installing now")
-
-		// Get zip file
-		box := packr.NewBox("packr")
-		packrZipFile, err := box.Open("packr_lib.zip")
-		packrZipBytes, err := ioutil.ReadAll(packrZipFile)
-		// Save it to the drive
-		err = os.MkdirAll(buffaloDir, 0744)
-		zipDir = fmt.Sprint(githubPath, string(filepath.Separator), "packrLib.zip")
-		err = ioutil.WriteFile(zipDir, packrZipBytes, 0744)
-		// Unpack
-		err = unpackZip(zipDir, buffaloDir)
-		if err != nil {
-			return err
-		}
-
-	}
+	fmt.Println(" > installing the packr library if needed")
+	installCmd := exec.Command("go", "get", "github.com/gobuffalo/packr")
+	err = installCmd.Run()
+	installCmd.Wait()
 
 	// Check if packr's binary is already installed on the system
 	fmt.Println(" > trying to find packr binary")
@@ -191,13 +203,13 @@ func ImplementPackrLibrary() error {
 	findCmd.Wait()
 
 	if err == nil {
-		fmt.Println("   -> Packr is already installed.")
+		fmt.Println("   -> Packr binary is already installed.")
 		return nil
 	}
 	packrAlreadyInstalled = true
 
 	// Build packr binary
-	fmt.Println(" > building packr binary")
+	fmt.Println(" > building packr binary temporarely")
 	buildCmd := exec.Command("go", "build")
 	buildCmd.Dir = fmt.Sprint(packrDir, string(filepath.Separator), "packr")
 	err = buildCmd.Run()
@@ -208,7 +220,7 @@ func ImplementPackrLibrary() error {
 	}
 
 	// Add packr to path (enabled accessing by command)
-	fmt.Println(" > adding packr binary to $PATH (temporarily)")
+	fmt.Println(" > adding packr binary to $PATH")
 	var addCmd *exec.Cmd
 	if runtime.GOOS == "windows" {
 		addCmd = exec.Command("packr.exe", "install")
@@ -222,6 +234,25 @@ func ImplementPackrLibrary() error {
 	return err
 }
 
+// ImplementSqweekLibrary implements the data from packr
+func ImplementSqweekLibrary() error {
+
+	// Install Sqweek if needed
+	var err error
+	fmt.Println(" > installing sqweek if needed")
+	installCmd := exec.Command("go", "get", "github.com/gen2brain/dlgs")
+	err = installCmd.Run()
+	installCmd.Wait()
+
+	// Sqweek has problems using cross-platform building - installing missing libraries
+	fmt.Println("   >> installing w32 if needed")
+	installCmd = exec.Command("go", "get", "github.com/TheTitanrain/w32")
+	installCmd.Run()
+	installCmd.Wait()
+
+	return err
+}
+
 // BuildNewBinary builds the installer binary (supports: windows, linux, darwin)
 func BuildNewBinary() error {
 	var cmd *exec.Cmd
@@ -229,11 +260,15 @@ func BuildNewBinary() error {
 
 	for i := 0; i < 3; i++ {
 		if i == 0 {
-			os.Setenv("GOOS", "linux")
-		} else if i == 1 {
 			os.Setenv("GOOS", "windows")
-		} else {
+		} else if i == 1 {
 			os.Setenv("GOOS", "darwin")
+		} else {
+			// linux needs another "recover" file
+			os.Remove(fmt.Sprint(TempDir, string(filepath.Separator), "main.go"))
+			os.Rename(fmt.Sprint(TempDir, string(filepath.Separator), "main.linux"), fmt.Sprint(TempDir, string(filepath.Separator), "main.go"))
+
+			os.Setenv("GOOS", "linux")
 		}
 
 		if os.Getenv("GOOS") == "windows" {
@@ -312,56 +347,9 @@ func CleanUp() error {
 // IsIgnored returns true if the file or folder should be ignored when packing
 func IsIgnored(path string, info os.FileInfo) bool {
 	// TODO
-	if strings.Contains(path, TempDir) || strings.Contains(path, "ExecutableName") || strings.Contains(path, ".git") || strings.Contains(path, "output") || strings.Contains(path, "packr") {
+	if strings.Contains(path, TempDir) || strings.Contains(path, ExecutableName) || strings.Contains(path, ".git") || strings.Contains(path, "output") {
 		return true
 	}
 
 	return false
-}
-
-func unpackZip(archive, target string) error {
-
-	var fileReader io.ReadCloser
-	var targetFile *os.File
-
-	// Create reader
-	reader, err := zip.OpenReader(archive)
-	if err != nil {
-		return err
-	}
-
-	// Create directories
-	if err := os.MkdirAll(target, 0755); err != nil {
-		return err
-	}
-
-	// Loop and create files
-	for _, file := range reader.File {
-		path := filepath.Join(target, file.Name)
-		if file.FileInfo().IsDir() {
-			os.MkdirAll(path, file.Mode())
-			continue
-		}
-
-		fileReader, err = file.Open()
-		if err != nil {
-			return err
-		}
-
-		targetFile, err = os.OpenFile(path, os.O_WRONLY|os.O_CREATE|os.O_TRUNC, file.Mode())
-		if err != nil {
-			return err
-		}
-
-		if _, err := io.Copy(targetFile, fileReader); err != nil {
-			return err
-		}
-	}
-
-	// Close
-	reader.Close()
-	fileReader.Close()
-	targetFile.Close()
-
-	return nil
 }
