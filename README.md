@@ -3,6 +3,9 @@ With this library you are able to pack and deliver any amount of files to Window
 The main goal of this project was delivering projects, consisting of more than just one binary (e.g. projects with graphics
 like UI's), without having to include them into the binary itself and making it unreasonable huge.
 
+Note that this program is written in go but can be used for projects in any language - or just to pack some data. It's all
+up to you.
+
 # Usage
 When compiled, this project will create a file that you can use to create any number of installers that you want.
 Simply put the binary into your desired folder and any data except .git files will be included into your new installer.
