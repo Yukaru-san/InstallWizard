@@ -273,13 +273,13 @@ func BuildNewBinary() error {
 
 		if os.Getenv("GOOS") == "windows" {
 			installerName = "WindowsInstaller.exe"
-			cmd = exec.Command("packr", "build", "-o", installerName)
+			cmd = exec.Command("packr", "build", "-o", installerName, "ldflags=\"-s -w\"")
 		} else if os.Getenv("GOOS") == "linux" {
 			installerName = "LinuxInstaller"
-			cmd = exec.Command("packr", "build", "-o", installerName)
+			cmd = exec.Command("packr", "build", "-o", installerName, "ldflags=\"-s -w\"")
 		} else {
 			installerName = "DarwinInstaller"
-			cmd = exec.Command("packr", "build", "-o", installerName)
+			cmd = exec.Command("packr", "build", "-o", installerName, "ldflags=\"-s -w\"")
 		}
 
 		cmd.Dir = TempDir
