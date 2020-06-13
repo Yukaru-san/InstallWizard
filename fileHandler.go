@@ -41,7 +41,7 @@ var (
 	// Dirs contains all dirs
 	Dirs []Directory
 
-	// TempDir temporarely holds all data needed
+	// TempDir holds all data needed
 	TempDir = "WorkingDirectoryDoNotDelete"
 	// FilesPath holds installer data
 	FilesPath = ""
