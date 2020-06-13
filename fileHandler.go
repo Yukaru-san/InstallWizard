@@ -83,7 +83,7 @@ func ImplementFiles(sourcePath string) error {
 		baseDir = filepath.Base(sourcePath)
 	}
 
-	fmt.Println("---starting to searching---")
+	fmt.Println("---starting to search---")
 	filepath.Walk(sourcePath, func(path string, info os.FileInfo, err error) error {
 
 		// Check if file should be ignored
@@ -273,13 +273,13 @@ func BuildNewBinary() error {
 
 		if os.Getenv("GOOS") == "windows" {
 			installerName = "WindowsInstaller.exe"
-			cmd = exec.Command("packr", "build", "-o", installerName, "ldflags=\"-s -w\"")
+			cmd = exec.Command("packr", "build", "-o", installerName, "-ldflags=-s -w")
 		} else if os.Getenv("GOOS") == "linux" {
 			installerName = "LinuxInstaller"
-			cmd = exec.Command("packr", "build", "-o", installerName, "ldflags=\"-s -w\"")
+			cmd = exec.Command("packr", "build", "-o", installerName, "-ldflags=-s -w")
 		} else {
 			installerName = "DarwinInstaller"
-			cmd = exec.Command("packr", "build", "-o", installerName, "ldflags=\"-s -w\"")
+			cmd = exec.Command("packr", "build", "-o", installerName, "-ldflags=-s -w")
 		}
 
 		cmd.Dir = TempDir
