@@ -26,7 +26,7 @@ a precompiled version for your OS.
 # Example
 ## Creating an Installer
 Using the InstallWizard is pretty straight forward. But here is a complete example on how it can be used:
-<br>(Note that it will be a bit different on linux since it's done from command-line only!)
+<br>**Note that the user experience will be a bit different on linux since it's done from command-line only!**<br>
 
 1. Find a directory that you want to pack:<br>
 ![example1](https://very.highly.illegal-dark-web-server.xyz/preview/raw/qSCYeEawhci7d4qROuqPYOnVy)
