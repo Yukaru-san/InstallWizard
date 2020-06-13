@@ -24,6 +24,7 @@ a precompiled version for your OS.
 
 
 # Example
+## Creating an Installer
 Using the InstallWizard is pretty straight forward. But here is a complete example on how it can be used:
 <br>(Note that it will be a bit different on linux since it's done from command-line only!)
 
@@ -42,7 +43,9 @@ Using the InstallWizard is pretty straight forward. But here is a complete examp
 5. Inside, you will find your compiled installer for Windows, Linux and Mac OS:<br>
 ![example5](https://very.highly.illegal-dark-web-server.xyz/preview/raw/6XzXxlptCdwgp1OoJsfTFsTLH)
 
-Now you can ship the installers to your clients. Upon installation their POV will be:
+Now you can ship the installers to your clients.
+
+## Client perspective: How to use the installer
 
 1. Running the installer:<br>
 ![example6](https://very.highly.illegal-dark-web-server.xyz/preview/raw/8YnbLNlgclgEbVXKpg4pK9Jba)
