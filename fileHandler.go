@@ -245,7 +245,7 @@ func ImplementSqweekLibrary() error {
 	installCmd.Wait()
 
 	// Sqweek has problems using cross-platform building - installing missing libraries
-	fmt.Println("   >> installing w32 if needed")
+	fmt.Println(" > installing w32 if needed")
 	installCmd = exec.Command("go", "get", "github.com/TheTitanrain/w32")
 	installCmd.Run()
 	installCmd.Wait()

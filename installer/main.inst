@@ -88,7 +88,7 @@ func CreateFiles(box packr.Box, installDir string) {
 func SelectPath(programName string) string {
 	dlgs.Info("InstallWizard", "This will install "+programName+" onto your harddrive. Please select your desired installation folder")
 
-	dir, _, err := dlgs.File("Please select the directory you wish your program to be installed into", "", true)
+	dir, _, err := dlgs.File("Please select the directory you wish your program to be installed in", "", true)
 
 	if err != nil {
 		dlgs.Info("InstallWizard", "Setup successfully cancled.")
