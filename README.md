@@ -24,33 +24,36 @@ a precompiled version for your OS.
 
 
 # Example
+## Creating an Installer
 Using the InstallWizard is pretty straight forward. But here is a complete example on how it can be used:
 <br>(Note that it will be a bit different on linux since it's done from command-line only!)
 
-1. Find a directory that you want to pack:
-![example1](https://very.highly.illegal-dark-web-server.xyz/preview/raw/KbwmRXtLV1FbRCtWHOigFivwV)
+1. Find a directory that you want to pack:<br>
+![example1](https://very.highly.illegal-dark-web-server.xyz/preview/raw/qSCYeEawhci7d4qROuqPYOnVy)
 
-2. Include the InstallWizard binary into your desired directory:
-![example2](https://very.highly.illegal-dark-web-server.xyz/preview/raw/NTgIiDA0ugtl6VcbHpWxqk58e)
+2. Include the InstallWizard binary into your desired directory:<br>
+![example2](https://very.highly.illegal-dark-web-server.xyz/preview/raw/5FwBaK2tf93xmWoe6c1Gp4aNA)
 
-3. Run the InstallWizard and tell the program how you want to name your installer
-![example3](https://very.highly.illegal-dark-web-server.xyz/preview/raw/gSR9ERD5IZBYudWpChikwsEwm)
+3. Run the InstallWizard and tell the program how you want to name your installer:<br>
+![example3](https://very.highly.illegal-dark-web-server.xyz/preview/raw/djDx1VbYyAs2fmVFXV54tXhhD)
 
-4. After the wizard is done, you will see an output directory:
-![example4](https://very.highly.illegal-dark-web-server.xyz/preview/raw/5vLWcZV2VUnfpoiHhzeTtsojX)
+4. After the wizard is done, you will see an output directory:<br>
+![example4](https://very.highly.illegal-dark-web-server.xyz/preview/raw/opi5loj0Cv7poWw1Mts2cjI2f)
 
-5. Inside, you will find your compiled installer for Windows, Linux and Mac OS
-![example5](https://very.highly.illegal-dark-web-server.xyz/preview/raw/LyVyshiSgJPsSg5QX2DMxJG2z)
+5. Inside, you will find your compiled installer for Windows, Linux and Mac OS:<br>
+![example5](https://very.highly.illegal-dark-web-server.xyz/preview/raw/6XzXxlptCdwgp1OoJsfTFsTLH)
 
-Now you can ship the installers to your clients. Upon installation their POV will be:
+Now you can ship the installers to your clients.
+
+## Client perspective: How to use the installer
 
 1. Running the installer:<br>
-![example6](https://very.highly.illegal-dark-web-server.xyz/preview/raw/5W9FwYXPn15HqOdqpTxKPLitF)
+![example6](https://very.highly.illegal-dark-web-server.xyz/preview/raw/8YnbLNlgclgEbVXKpg4pK9Jba)
 
 2. Selecting the directory for the program to be installed in:<br>
-![example7](https://very.highly.illegal-dark-web-server.xyz/preview/raw/l3YjZEhWczdgQiTdEh6Z8r7zm)
+![example7](https://very.highly.illegal-dark-web-server.xyz/preview/raw/Tc1nAoqKnjvqhkjQZmQ1di8K9)
 
-3. The data will be extracted and you can find everything inside the desired directory:
-![example8](https://very.highly.illegal-dark-web-server.xyz/preview/raw/irHjVghKajLygWvntLqFBJRL6)
+3. The data will be extracted and you can find everything inside the desired directory:<br>
+![example8](https://very.highly.illegal-dark-web-server.xyz/preview/raw/ItAriACKIVja5Bs7JhGCpAqyB)
 
 And that's pretty much it. If you have any suggestions or ideas on how to improve this project, feel free to create an issue!
