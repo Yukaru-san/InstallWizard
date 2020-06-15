@@ -19,7 +19,7 @@ And that's pretty much it. You will receive the binary which you can then use to
 
 # Download binaries
 If you want to spare yourself the trouble of creating your own binary, you can head over to
-the [release tab](https://github.com/Yukaru-san/InstallWizard/releases/tag/1.0) and download
+the [release tab](https://github.com/Yukaru-san/InstallWizard/releases/tag/1.5) and download
 a precompiled version for your OS.
 
 
