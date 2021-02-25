@@ -2,16 +2,19 @@ package main
 
 import (
 	"archive/zip"
-	"bufio"
+	_ "embed"
 	"fmt"
 	"io"
 	"io/ioutil"
 	"os"
 	"path/filepath"
-	"strings"
-
-	"github.com/gobuffalo/packr"
 )
+
+//go:embed files/name.txt
+var ProgramName string
+
+//go:embed files/packedFiles.zip
+var ZipData []byte
 
 // DataStruct contains the saved files and dirs
 type DataStruct struct {
@@ -33,46 +36,19 @@ type File struct {
 	Permission os.FileMode
 }
 
-var (
-	data    DataStruct
-	zipName = "packedFiles.zip"
+// ZipName : the temporary zip's name
+var ZipName = "packedFiles.zip"
 
-	desiredDirectory = ""
-)
-
+// Program
 func main() {
-	// Program
 	RecoverFileStructure()
 }
 
-// RecoverFileStructure recovers files into DataStruct
-func RecoverFileStructure() {
-
-	box := packr.NewBox("files")
-
-	// Program name
-	nameFile, _ := box.Open("name.txt")
-	nameData, _ := ioutil.ReadAll(nameFile)
-
-	// Installation path
-	desiredDirectory = SelectPath(string(nameData))
-
-	// Unpack and create files
-	fmt.Println("Unpacking files...")
-	CreateFiles(box, desiredDirectory)
-	fmt.Println("Finished. You are ready to go!")
-}
-
 // CreateFiles creates the file structure saved in files in another location
-func CreateFiles(box packr.Box, installDir string) {
-
-	// zip file
-	zipFile, _ := box.Open(zipName)
-	zipData, _ := ioutil.ReadAll(zipFile)
-
+func CreateFiles(installDir string) {
 	// temporarely save zip file
-	zipPath := fmt.Sprint(installDir, string(filepath.Separator), zipName)
-	err := ioutil.WriteFile(zipPath, zipData, 0744)
+	zipPath := fmt.Sprint(installDir, string(filepath.Separator), ZipName)
+	err := ioutil.WriteFile(zipPath, ZipData, 0744)
 
 	if err != nil {
 		panic(err)
@@ -86,30 +62,6 @@ func CreateFiles(box packr.Box, installDir string) {
 
 	// Delete zip file
 	os.Remove(zipPath)
-}
-
-// SelectPath returns the path the user wishes to install the programm into
-func SelectPath(programName string) string {
-
-	reader := bufio.NewReader(os.Stdin)
-	fmt.Println("This will install " + programName + ".")
-
-	dir := ""
-
-	if len(os.Args) == 1 {
-		fmt.Print("\nYou didn't specify an installation path when starting the installer.\nPlease do so now:")
-
-		input, _ := reader.ReadString('\n')
-		input = strings.ReplaceAll(input, "\n", "")
-
-		dir = input
-	} else {
-		dir = os.Args[1]
-		fmt.Println("You chose " + dir + " as your installation path.")
-	}
-
-	fmt.Print("\n\n")
-	return dir
 }
 
 // UnpackZip unpacks the archive in the given path

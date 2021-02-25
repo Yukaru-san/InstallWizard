@@ -33,8 +33,6 @@ func main() {
 	printError(err)
 
 	fmt.Println("Implementing required libraries")
-	err = ImplementPackrLibrary()
-	printError(err)
 	err = ImplementSqweekLibrary()
 	printError(err)
 

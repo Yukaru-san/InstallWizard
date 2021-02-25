@@ -9,11 +9,19 @@ import (
 	"os"
 	"os/exec"
 	"path/filepath"
-	"runtime"
 	"strings"
 
-	"github.com/gobuffalo/packr"
+	_ "embed"
 )
+
+//go:embed installer/recover.go
+var guiRecover []byte
+
+//go:embed installer/recover_cli.go
+var cliRecover []byte
+
+//go:embed installer/main.go
+var mainFile []byte
 
 // DataStruct contains the saved files and dirs
 type DataStruct struct {
@@ -48,8 +56,7 @@ var (
 	zipName   = "packedFiles.zip"
 
 	// directions needed for save and cleanup
-	zipDir                = ""
-	packrAlreadyInstalled = false
+	zipDir = ""
 
 	// ExecutableName is the process's name that started this program
 	ExecutableName = ""
@@ -61,10 +68,10 @@ var (
 // ImplementFiles searches the given dir and implements found files
 func ImplementFiles(sourcePath string) error {
 	// Create zip folder path
-	FilesPath = fmt.Sprint(TempDir, string(filepath.Separator), "files")
+	FilesPath = fmt.Sprint(filepath.Join(TempDir, "files"))
 	os.Mkdir(FilesPath, 0744)
 
-	zipfile, err := os.Create(fmt.Sprint(FilesPath, string(filepath.Separator), zipName))
+	zipfile, err := os.Create(filepath.Join(FilesPath, zipName))
 	if err != nil {
 		return err
 	}
@@ -167,74 +174,14 @@ func ImplementInstallerName() error {
 func ImplementInstallerFiles() error {
 	var err error
 
-	// Open file compiled into the exe (.inst, cause packr causes issues otherwise)
-	box := packr.NewBox("installer")
-
-	mainFile, err := box.Open("main.inst")
-	mainData, err := ioutil.ReadAll(mainFile)
-
-	mainFileLinux, err := box.Open("main_linux.inst")
-	mainDataLinux, err := ioutil.ReadAll(mainFileLinux)
-
-	err = ioutil.WriteFile(fmt.Sprint(TempDir, string(filepath.Separator), "main.go"), mainData, 0744)
-	err = ioutil.WriteFile(fmt.Sprint(TempDir, string(filepath.Separator), "main.linux"), mainDataLinux, 0744)
+	err = ioutil.WriteFile(filepath.Join(TempDir, "recover.go"), guiRecover, 0744)
+	err = ioutil.WriteFile(filepath.Join(TempDir, "recover_cli.go"), cliRecover, 0744)
+	err = ioutil.WriteFile(filepath.Join(TempDir, "main.go"), mainFile, 0744)
 
 	return err
 }
 
-// ImplementPackrLibrary implements the data from packr
-func ImplementPackrLibrary() error {
-
-	// Checking if packr's library is installed on the system
-	packrDir := fmt.Sprint(os.Getenv("GOPATH"), string(filepath.Separator), "src", string(filepath.Separator), "github.com", string(filepath.Separator), "gobuffalo", string(filepath.Separator), "packr", string(filepath.Separator))
-
-	var err error
-
-	fmt.Println(" > installing the packr library if needed")
-	installCmd := exec.Command("go", "get", "github.com/gobuffalo/packr")
-	err = installCmd.Run()
-	installCmd.Wait()
-
-	// Check if packr's binary is already installed on the system
-	fmt.Println(" > trying to find packr binary")
-
-	findCmd := exec.Command("packr")
-	err = findCmd.Run()
-	findCmd.Wait()
-
-	if err == nil {
-		fmt.Println("   -> Packr binary is already installed.")
-		return nil
-	}
-	packrAlreadyInstalled = true
-
-	// Build packr binary
-	fmt.Println(" > building packr binary temporarely")
-	buildCmd := exec.Command("go", "build")
-	buildCmd.Dir = fmt.Sprint(packrDir, string(filepath.Separator), "packr")
-	err = buildCmd.Run()
-	buildCmd.Wait()
-
-	if err != nil {
-		return err
-	}
-
-	// Add packr to path (enabled accessing by command)
-	fmt.Println(" > adding packr binary to $PATH")
-	var addCmd *exec.Cmd
-	if runtime.GOOS == "windows" {
-		addCmd = exec.Command("packr.exe", "install")
-	} else {
-		addCmd = exec.Command("./packr", "install")
-	}
-	addCmd.Dir = fmt.Sprint(packrDir, string(filepath.Separator), "packr")
-	err = addCmd.Run()
-	addCmd.Wait()
-
-	return err
-}
-
-// ImplementSqweekLibrary implements the data from packr
+// ImplementSqweekLibrary downloads needed libs if needed
 func ImplementSqweekLibrary() error {
 
 	// Install Sqweek if needed
@@ -264,22 +211,23 @@ func BuildNewBinary() error {
 		} else if i == 1 {
 			os.Setenv("GOOS", "darwin")
 		} else {
-			// linux needs another "recover" file
-			os.Remove(fmt.Sprint(TempDir, string(filepath.Separator), "main.go"))
-			os.Rename(fmt.Sprint(TempDir, string(filepath.Separator), "main.linux"), fmt.Sprint(TempDir, string(filepath.Separator), "main.go"))
-
+			/*
+				// linux needs another "recover" file
+				os.Remove(fmt.Sprint(TempDir, string(filepath.Separator), "main.go"))
+				os.Rename(fmt.Sprint(TempDir, string(filepath.Separator), "main.linux"), fmt.Sprint(TempDir, string(filepath.Separator), "main.go"))
+			*/
 			os.Setenv("GOOS", "linux")
 		}
 
 		if os.Getenv("GOOS") == "windows" {
 			installerName = "WindowsInstaller.exe"
-			cmd = exec.Command("packr", "build", "-o", installerName, "-ldflags=-s -w -H=windowsgui")
+			cmd = exec.Command("go", "build", "-o", installerName, "-ldflags=-s -w -H=windowsgui")
 		} else if os.Getenv("GOOS") == "linux" {
 			installerName = "LinuxInstaller"
-			cmd = exec.Command("packr", "build", "-o", installerName, "-ldflags=-s -w")
+			cmd = exec.Command("go", "build", "-o", installerName, "-ldflags=-s -w")
 		} else {
 			installerName = "DarwinInstaller"
-			cmd = exec.Command("packr", "build", "-o", installerName, "-ldflags=-s -w")
+			cmd = exec.Command("go", "build", "-o", installerName, "-ldflags=-s -w")
 		}
 
 		cmd.Dir = TempDir
@@ -331,15 +279,6 @@ func CleanUp() error {
 
 	// zip
 	os.Remove(zipDir)
-
-	// binary
-	if packrAlreadyInstalled {
-		if runtime.GOOS == "windows" {
-			err = os.Remove(fmt.Sprint(os.Getenv("GOPATH"), string(filepath.Separator), "bin", string(filepath.Separator), "packr.exe"))
-		} else {
-			err = os.Remove(fmt.Sprint(os.Getenv("GOPATH"), string(filepath.Separator), "bin", string(filepath.Separator), "packr"))
-		}
-	}
 
 	return err
 }
