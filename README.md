@@ -25,13 +25,6 @@ Or build your own following these steps:<br>
 ```go mod tidy```<br>
 ```go build```<br>
 
-
-will need
-to install packr beforehand. Head over to [packr's repository](https://github.com/gobuffalo/packr) and install it's first version.
-When you are done, you can build the InstallWizard using:
-```packr build```<br>
-And that's pretty much it. You will receive the binary which you can then use to create new installers.
-
 # Example
 ## Creating an Installer
 Using the InstallWizard is pretty straight forward. But here is a complete example on how it can be used:
