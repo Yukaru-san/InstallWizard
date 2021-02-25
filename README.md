@@ -28,6 +28,7 @@ Or build your own following these steps:<br>
 # Example
 ## Creating an Installer
 Using the InstallWizard is pretty straight forward. But here is a complete example on how it can be used:
+
 <br>**Note that the user experience will be a bit different on linux since it's done from command-line only!**<br>
 
 1. Find a directory that you want to pack:<br>
@@ -57,5 +58,7 @@ Now you can ship the installers to your clients.
 
 3. The data will be extracted and you can find everything inside the desired directory:<br>
 ![example8](https://files.jojii.de/preview/raw/ItAriACKIVja5Bs7JhGCpAqyB)
+
+
 
 And that's pretty much it. If you have any suggestions or ideas on how to improve this project, feel free to create an issue!
