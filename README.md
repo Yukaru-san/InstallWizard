@@ -6,22 +6,31 @@ like an UI), without having to include them into the binary itself and making it
 Note that this program is written in go but can be used for projects in any language - or just to pack some data. It's all
 up to you.
 
+<b>Please note:</b><br>
+The generated installer uses a GUI on Windows and Darwin but CLI on Linux!
+
 # Usage
 When compiled, this project will create a file that you can use to create any number of installers you want.
-Simply put the binary into your desired folder and any data except .git files will be included into your new installer.
+Simply call the binary from your desired directory and all files will be included into your new installer.
+
+All files and directories containing ".git" will be ignored.
 
 # Installation
-As said before, you will only need the compiled version of this project. Anyway, if you want to compile it yourself you will need
+Either download the precompiled version here:<br>
+[Release 2.0](https://github.com/Yukaru-san/InstallWizard/releases/tag/2.0)<br>
+
+Or build your own following these steps:<br>
+```git pull https://github.com/Yukaru-san/InstallWizard.git```<br>
+```cd InstallWizard```<br>
+```go mod tidy```<br>
+```go build```<br>
+
+
+will need
 to install packr beforehand. Head over to [packr's repository](https://github.com/gobuffalo/packr) and install it's first version.
 When you are done, you can build the InstallWizard using:
 ```packr build```<br>
 And that's pretty much it. You will receive the binary which you can then use to create new installers.
-
-# Download binaries
-If you want to spare yourself the trouble of creating your own binary, you can head over to
-the [release tab](https://github.com/Yukaru-san/InstallWizard/releases/tag/1.5) and download
-a precompiled version for your OS.
-
 
 # Example
 ## Creating an Installer
