@@ -45,6 +45,8 @@ func main() {
 
 // CreateFiles creates the file structure saved in files in another location
 func CreateFiles(installDir string) {
+	os.MkdirAll(installDir, os.ModePerm)
+
 	// temporarely save zip file
 	zipPath := fmt.Sprint(installDir, string(filepath.Separator), ZipName)
 	err := os.WriteFile(zipPath, ZipData, 0744)
