@@ -5,7 +5,6 @@ import (
 	"bufio"
 	"fmt"
 	"io"
-	"io/ioutil"
 	"os"
 	"os/exec"
 	"path/filepath"
@@ -22,6 +21,12 @@ var cliRecover []byte
 
 //go:embed installer/main.go
 var mainFile []byte
+
+//go:embed installer/go.mod.x
+var modFile []byte
+
+//go:embed installer/go.sum.x
+var sumFile []byte
 
 // DataStruct contains the saved files and dirs
 type DataStruct struct {
@@ -50,7 +55,7 @@ var (
 	Dirs []Directory
 
 	// TempDir holds all data needed
-	TempDir = "WorkingDirectoryDoNotDelete"
+	TempDir = ".WorkingDirectoryDoNotDelete"
 	// FilesPath holds installer data
 	FilesPath = ""
 	zipName   = "packedFiles.zip"
@@ -166,7 +171,7 @@ func ImplementInstallerName() error {
 	}
 
 	fmt.Print("\n\n")
-	err := ioutil.WriteFile(fmt.Sprint(FilesPath, string(filepath.Separator), "name.txt"), []byte(name), 0744)
+	err := os.WriteFile(fmt.Sprint(FilesPath, string(filepath.Separator), "name.txt"), []byte(name), 0744)
 	return err
 }
 
@@ -174,9 +179,27 @@ func ImplementInstallerName() error {
 func ImplementInstallerFiles() error {
 	var err error
 
-	err = ioutil.WriteFile(filepath.Join(TempDir, "recover.go"), guiRecover, 0744)
-	err = ioutil.WriteFile(filepath.Join(TempDir, "recover_cli.go"), cliRecover, 0744)
-	err = ioutil.WriteFile(filepath.Join(TempDir, "main.go"), mainFile, 0744)
+	err = os.WriteFile(filepath.Join(TempDir, "recover.go"), guiRecover, 0744)
+	if err != nil {
+		return err
+	}
+
+	err = os.WriteFile(filepath.Join(TempDir, "recover_cli.go"), cliRecover, 0744)
+	if err != nil {
+		return err
+	}
+
+	err = os.WriteFile(filepath.Join(TempDir, "main.go"), mainFile, 0744)
+	if err != nil {
+		return err
+	}
+
+	err = os.WriteFile(filepath.Join(TempDir, "go.sum"), sumFile, 0744)
+	if err != nil {
+		return err
+	}
+
+	err = os.WriteFile(filepath.Join(TempDir, "go.mod"), modFile, 0744)
 
 	return err
 }
@@ -205,6 +228,7 @@ func BuildNewBinary() error {
 	var cmd *exec.Cmd
 	var installerName string
 
+	// Build command
 	for i := 0; i < 3; i++ {
 		if i == 0 {
 			os.Setenv("GOOS", "windows")
@@ -242,7 +266,7 @@ func BuildNewBinary() error {
 
 		// Read binary
 		tempBinaryPath := fmt.Sprint(TempDir, string(filepath.Separator), installerName)
-		binary, err := ioutil.ReadFile(tempBinaryPath)
+		binary, err := os.ReadFile(tempBinaryPath)
 
 		if err != nil {
 			return err
@@ -250,7 +274,7 @@ func BuildNewBinary() error {
 
 		// Save binary
 		binaryPath := fmt.Sprint("output", string(filepath.Separator), installerName)
-		err = ioutil.WriteFile(binaryPath, binary, 0744)
+		err = os.WriteFile(binaryPath, binary, 0744)
 
 		// Delete the temporary binary
 		os.Remove(tempBinaryPath)
