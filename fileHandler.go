@@ -235,11 +235,6 @@ func BuildNewBinary() error {
 		} else if i == 1 {
 			os.Setenv("GOOS", "darwin")
 		} else {
-			/*
-				// linux needs another "recover" file
-				os.Remove(fmt.Sprint(TempDir, string(filepath.Separator), "main.go"))
-				os.Rename(fmt.Sprint(TempDir, string(filepath.Separator), "main.linux"), fmt.Sprint(TempDir, string(filepath.Separator), "main.go"))
-			*/
 			os.Setenv("GOOS", "linux")
 		}
 
