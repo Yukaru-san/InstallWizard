@@ -5,7 +5,6 @@ import (
 	_ "embed"
 	"fmt"
 	"io"
-	"io/ioutil"
 	"os"
 	"path/filepath"
 )
@@ -48,7 +47,7 @@ func main() {
 func CreateFiles(installDir string) {
 	// temporarely save zip file
 	zipPath := fmt.Sprint(installDir, string(filepath.Separator), ZipName)
-	err := ioutil.WriteFile(zipPath, ZipData, 0744)
+	err := os.WriteFile(zipPath, ZipData, 0744)
 
 	if err != nil {
 		panic(err)
