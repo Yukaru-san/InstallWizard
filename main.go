@@ -56,7 +56,7 @@ func printError(err error) {
 
 // SetupCloseHandler catches an interrupt signal from the host pc and cleans the files before exiting
 func SetupCloseHandler() {
-	c := make(chan os.Signal, 1)
+	c := make(chan os.Signal)
 	signal.Notify(c, os.Interrupt, syscall.SIGTERM)
 	go func() {
 		<-c
