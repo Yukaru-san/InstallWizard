@@ -24,3 +24,6 @@ Or build your own following these steps:<br>
 ```cd InstallWizard```<br>
 ```go mod tidy```<br>
 ```go build```<br>
+
+# Example
+For examples on the installer, have a look into the 'screenshots' folder.
