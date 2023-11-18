@@ -17,7 +17,7 @@ All files and directories containing ".git" will be ignored.
 
 # Installation
 Either download the precompiled version here:<br>
-[Release 2.0](https://github.com/Yukaru-san/InstallWizard/releases/tag/2.0)<br>
+[Release 2.1](https://github.com/Yukaru-san/InstallWizard/releases/tag/2.1)<br>
 
 Or build your own following these steps:<br>
 ```git pull https://github.com/Yukaru-san/InstallWizard.git```<br>
